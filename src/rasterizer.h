@@ -82,6 +82,7 @@ namespace CGL
         // The number of elements in buffer = width * height * sample_rate
         std::vector<Color> sample_buffer;
 
+        // check a given point inside or on the triangle
         static bool check_inside(float px, float py, float x0, float y0, float x1, float y1, float x2, float y2);
 
      public:
