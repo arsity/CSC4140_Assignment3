@@ -6,10 +6,11 @@
 
 #include "svg.h"
 
-namespace CGL {
+namespace CGL
+{
 
 // triangulates a polygon and save the result as a triangle list
-void triangulate(const Polygon& polygon, std::vector<Vector2D>& triangles );
+    void triangulate(const Polygon& polygon, std::vector<Vector2D>& triangles);
 
 } // namespace CGL
 

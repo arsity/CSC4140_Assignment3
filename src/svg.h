@@ -18,169 +18,205 @@ using namespace tinyxml2;
 #include "transforms.h"
 #include "texture.h"
 
-namespace CGL {
+namespace CGL
+{
 
-class Rasterizer;
+    class Rasterizer;
 
-typedef enum e_SVGElementType {
-  NONE = 0,
-  POINT,
-  LINE,
-  POLYLINE,
-  RECT,
-  POLYGON,
-  ELLIPSE,
-  IMAGE,
-  GROUP,
-  TRIANGLE
-} SVGElementType;
+    typedef enum e_SVGElementType
+    {
+        NONE = 0,
+        POINT,
+        LINE,
+        POLYLINE,
+        RECT,
+        POLYGON,
+        ELLIPSE,
+        IMAGE,
+        GROUP,
+        TRIANGLE
+    } SVGElementType;
 
-struct Style {
-  Color strokeColor;
-  Color fillColor;
-  float strokeWidth;
-  float miterLimit;
-  bool strokeVisible;
-};
+    struct Style
+    {
+        Color strokeColor;
+        Color fillColor;
+        float strokeWidth;
+        float miterLimit;
+        bool strokeVisible;
+    };
 
-struct SVGElement {
+    struct SVGElement
+    {
 
-  SVGElement( SVGElementType _type ) 
-    : type( _type ), transform( Matrix3x3::identity() ) { }
+        SVGElement(SVGElementType _type)
+            : type(_type), transform(Matrix3x3::identity())
+        {
+        }
 
-  virtual ~SVGElement() { }
+        virtual ~SVGElement()
+        {
+        }
 
-  virtual void draw(Rasterizer *dr, Matrix3x3 global_transform) = 0;
+        virtual void draw(Rasterizer* dr, Matrix3x3 global_transform) = 0;
 
-  // primitive type
-  SVGElementType type;
+        // primitive type
+        SVGElementType type;
 
-  // styling
-  Style style;
+        // styling
+        Style style;
 
-  // transformation list
-  Matrix3x3 transform;
-  
-};
+        // transformation list
+        Matrix3x3 transform;
+
+    };
 
 // A triangle with a uniform color
 //
-struct Triangle : SVGElement {
+    struct Triangle : SVGElement
+    {
 
-  Triangle(): SVGElement (TRIANGLE ) { }
-  Vector2D p0_svg, p1_svg, p2_svg;
-  Color clr;
+        Triangle() : SVGElement(TRIANGLE)
+        {
+        }
+        Vector2D p0_svg, p1_svg, p2_svg;
+        Color clr;
 
-  virtual void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        virtual void draw(Rasterizer* dr, Matrix3x3 global_transform);
 //  virtual Color color(Vector3D p_bary, Vector3D p_dx_bary = Vector3D(), Vector3D p_dy_bary = Vector3D(), SampleParams sp = SampleParams()) = 0;
-};
+    };
 
 // A triangle with color linearly interpolated from vertex colors
 //
-struct InterpolatedColorTriangle : Triangle {
+    struct InterpolatedColorTriangle : Triangle
+    {
 
-  virtual void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        virtual void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-  // Per-vertex colors. Color across triangle interpolates these vertex colors
-  // using barycentric coordinates.
-  Color p0_col, p1_col, p2_col;
-};
+        // Per-vertex colors. Color across triangle interpolates these vertex colors
+        // using barycentric coordinates.
+        Color p0_col, p1_col, p2_col;
+    };
 
 // A triangle with color defined by texture mapping.
 //
-struct TexturedTriangle : Triangle {
-  
-  virtual void draw(Rasterizer*dr, Matrix3x3 global_transform);
+    struct TexturedTriangle : Triangle
+    {
 
-  // Per-vertex uv texture coordinates.
-  // Color across triangle maps colors from the texture using interpolation
-  // of the texture coordinates.
-  Vector2D p0_uv, p1_uv, p2_uv;
-  Texture *tex;
-};
+        virtual void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Group : SVGElement {
+        // Per-vertex uv texture coordinates.
+        // Color across triangle maps colors from the texture using interpolation
+        // of the texture coordinates.
+        Vector2D p0_uv, p1_uv, p2_uv;
+        Texture* tex;
+    };
 
-  Group() : SVGElement  ( GROUP ) { }
-  std::vector<SVGElement*> elements;
+    struct Group : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        Group() : SVGElement(GROUP)
+        {
+        }
+        std::vector<SVGElement*> elements;
 
-  ~Group();
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-};
+        ~Group();
 
-struct Point : SVGElement {
+    };
 
-  Point() : SVGElement ( POINT ) { }
-  Vector2D position;
+    struct Point : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        Point() : SVGElement(POINT)
+        {
+        }
+        Vector2D position;
 
-};
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Line : SVGElement {
+    };
 
-  Line() : SVGElement ( LINE ) { }  
-  Vector2D from;
-  Vector2D to;
+    struct Line : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        Line() : SVGElement(LINE)
+        {
+        }
+        Vector2D from;
+        Vector2D to;
 
-};
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Polyline : SVGElement {
+    };
 
-  Polyline() : SVGElement  ( POLYLINE ) { }
-  std::vector<Vector2D> points;
+    struct Polyline : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        Polyline() : SVGElement(POLYLINE)
+        {
+        }
+        std::vector<Vector2D> points;
 
-};
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Rect : SVGElement {
+    };
 
-  Rect() : SVGElement ( RECT ) { }
-  Vector2D position;
-  Vector2D dimension;
+    struct Rect : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
+        Rect() : SVGElement(RECT)
+        {
+        }
+        Vector2D position;
+        Vector2D dimension;
 
-};
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Polygon : SVGElement {
+    };
 
-  Polygon() : SVGElement  ( POLYGON ) { }
-  std::vector<Vector2D> points;
+    struct Polygon : SVGElement
+    {
 
-  void draw(Rasterizer* dr, Matrix3x3 global_transform);
+        Polygon() : SVGElement(POLYGON)
+        {
+        }
+        std::vector<Vector2D> points;
 
-};
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-struct Image : SVGElement {
+    };
 
-  Image() : SVGElement  ( IMAGE ) { }
-  Vector2D position;
-  Vector2D dimension;
-  Texture tex;
+    struct Image : SVGElement
+    {
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform);
-  
-};
+        Image() : SVGElement(IMAGE)
+        {
+        }
+        Vector2D position;
+        Vector2D dimension;
+        Texture tex;
 
-struct SVG {
+        void draw(Rasterizer* dr, Matrix3x3 global_transform);
 
-  ~SVG();
-  float width, height;
-  std::vector<SVGElement*> elements;
-  std::map<std::string, Texture*> textures;
+    };
 
-  void draw(Rasterizer*dr, Matrix3x3 global_transform) {
-    for (int i = 0; i < elements.size(); ++i)
-      elements[i]->draw(dr, global_transform);
-  }
+    struct SVG
+    {
 
-};
+        ~SVG();
+        float width, height;
+        std::vector<SVGElement*> elements;
+        std::map<std::string, Texture*> textures;
+
+        void draw(Rasterizer* dr, Matrix3x3 global_transform)
+        {
+            for (int i = 0; i < elements.size(); ++i)
+                elements[i]->draw(dr, global_transform);
+        }
+
+    };
 
 } // namespace CGL
 

@@ -14,6 +14,25 @@ if (BUILD_DEBUG)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+## Add debug options
+# print compile warnings
+if (MSVC)
+    # warning level 4
+    add_compile_options(/W4)
+else()
+    # additional warnings
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# enable address sanitizer for debug
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # using regular Clang or AppleClang
+    # build type is Debug
+    add_compile_options(-g -O2)
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+endif()
+
 #-------------------------------------------------------------------------------
 # Set target
 #-------------------------------------------------------------------------------
