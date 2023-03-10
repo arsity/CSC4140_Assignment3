@@ -75,6 +75,33 @@ namespace CGL
         }
     }
 
+    bool RasterizerImp::check_inside(float px, float py, float x0, float y0, float x1, float y1, float x2, float y2)
+    {
+        // triangle lines
+        auto x_ab = x1 - x0;
+        auto x_bc = x2 - x1;
+        auto x_ca = x0 - x2;
+        auto y_ab = y1 - y0;
+        auto y_bc = y2 - y1;
+        auto y_ca = y0 - y2;
+
+        // point to target
+        auto x_ap = px - x0;
+        auto x_bp = px - x1;
+        auto x_cp = px - x2;
+        auto y_ap = py - y0;
+        auto y_bp = py - y1;
+        auto y_cp = py - y2;
+
+        // cross product of vectors
+        auto state1 = x_ab * y_ap - x_ap * y_ab;
+        auto state2 = x_bc * y_bp - x_bp * y_bc;
+        auto state3 = x_ca * y_cp - x_cp * y_ca;
+
+        return (state1 >= 0 && state2 >= 0 && state3 >= 0) || (state1 <= 0 && state2 <= 0 && state3 <= 0);
+
+    }
+
     // Rasterize a triangle.
     void RasterizerImp::rasterize_triangle(float x0, float y0,
         float x1, float y1,
@@ -82,6 +109,24 @@ namespace CGL
         Color color)
     {
         // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+
+        // generate box
+        auto x_min = floor(min(x0, min(x1, x2)));
+        auto x_max = ceil(max(x0, max(x1, x2)));
+        auto y_min = floor(min(x0, min(x1, x2)));
+        auto y_max = ceil(max(y0, max(y1, y2)));
+
+        // box iteration
+        for (auto x = x_min; x < x_max; x++)
+        {
+            for (auto y = y_min; y < y_max; y++)
+            {
+                if (check_inside(x + 0.5, y + 0.5, x0, y0, x1, y1, x2, y2))
+                {
+                    rasterize_point(x, y, color);
+                }
+            }
+        }
 
         // TODO: Task 2: Update to implement super-sampled rasterization
 
