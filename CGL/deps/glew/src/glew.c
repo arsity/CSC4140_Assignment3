@@ -41,7 +41,7 @@
 #include <stddef.h>  /* For size_t */
 
 /*
- * Define glewGetContext and related helper macros.
+ * Define glewGetContext and related __resolve_to_framebuffer macros.
  */
 #ifdef GLEW_MX
 #  define glewGetContext() ctx

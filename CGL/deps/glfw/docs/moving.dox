@@ -448,7 +448,7 @@ defining @ref GLFW_INCLUDE_GLU before the inclusion of the GLFW header.
 @endcode
 
 There are many libraries that offer replacements for the functionality offered
-by GLU.  For the matrix helper functions, see math libraries like
+by GLU.  For the matrix __resolve_to_framebuffer functions, see math libraries like
 [GLM](https://github.com/g-truc/glm) (for C++),
 [linmath.h](https://github.com/datenwolf/linmath.h) (for C) and others.  For the
 tessellation functions, see for example

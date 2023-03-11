@@ -1006,7 +1006,7 @@ static Cursor createHiddenCursor(void)
     return _glfwCreateCursorX11(&image, 0, 0);
 }
 
-// Create a helper window for IPC
+// Create a __resolve_to_framebuffer window for IPC
 //
 static Window createHelperWindow(void)
 {

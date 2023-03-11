@@ -255,7 +255,7 @@ namespace miniz {
    flag, OR if you used mz_zip_extract_archive_file_to_heap() or
    mz_zip_add_mem_to_archive_file_in_place()
         (which used this flag). If you can't switch to v1.15 but want to fix
-   this bug, just remove the uses of this flag from both helper funcs (and of
+   this bug, just remove the uses of this flag from both __resolve_to_framebuffer funcs (and of
    course don't use the flag).
        - Bugfix in mz_zip_reader_extract_to_mem_no_alloc() from kymoon when
    pUser_read_buf is not NULL and compressed size is > uncompressed size
@@ -525,7 +525,7 @@ namespace miniz {
 // Define MINIZ_NO_MALLOC to disable all calls to malloc, free, and realloc.
 // Note if MINIZ_NO_MALLOC is defined then the user must always provide custom
 // user alloc/free/realloc
-// callbacks to the zlib and archive API's, and a few stand-alone helper API's
+// callbacks to the zlib and archive API's, and a few stand-alone __resolve_to_framebuffer API's
 // which don't provide custom user
 // functions (such as tdefl_compress_mem_to_heap() and
 // tinfl_decompress_mem_to_heap()) won't work.
@@ -564,7 +564,7 @@ namespace miniz {
     defined(_LP64) || defined(__LP64__) || defined(__ia64__) ||                \
     defined(__x86_64__)
 // Set MINIZ_HAS_64BIT_REGISTERS to 1 if operations on 64-bit integers are
-// reasonably fast (and don't involve compiler generated calls to helper
+// reasonably fast (and don't involve compiler generated calls to __resolve_to_framebuffer
 // functions).
 #define MINIZ_HAS_64BIT_REGISTERS 1
 #endif
@@ -1163,7 +1163,7 @@ mz_bool mz_zip_writer_finalize_heap_archive(mz_zip_archive *pZip, void **pBuf,
 // Note for the archive to be valid, it must have been finalized before ending.
 mz_bool mz_zip_writer_end(mz_zip_archive *pZip);
 
-// Misc. high-level helper functions:
+// Misc. high-level __resolve_to_framebuffer functions:
 
 // mz_zip_add_mem_to_archive_file_in_place() efficiently (but not atomically)
 // appends a memory blob to a ZIP archive.
@@ -1448,9 +1448,9 @@ enum {
 };
 #endif
 
-// The low-level tdefl functions below may be used directly if the above helper
+// The low-level tdefl functions below may be used directly if the above __resolve_to_framebuffer
 // functions aren't flexible enough. The low-level functions don't make any heap
-// allocations, unlike the above helper functions.
+// allocations, unlike the above __resolve_to_framebuffer functions.
 typedef enum {
   TDEFL_STATUS_BAD_PARAM = -2,
   TDEFL_STATUS_PUT_BUF_FAILED = -1,
@@ -2657,7 +2657,7 @@ common_exit:
   return status;
 }
 
-// Higher level helper functions.
+// Higher level __resolve_to_framebuffer functions.
 void *tinfl_decompress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len,
                                    size_t *pOut_len, int flags) {
   tinfl_decompressor decomp;

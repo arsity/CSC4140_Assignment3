@@ -82,8 +82,9 @@ namespace CGL
         // The number of elements in buffer = width * height * sample_rate
         std::vector<Color> sample_buffer;
 
-        // Check a given point inside or on the triangle
-        static bool check_inside(float px, float py, float x0, float y0, float x1, float y1, float x2, float y2);
+        bool check_inside(float x0, float y0, float x1, float y1, float x2, float y2, float px, float py, Color color);
+
+        Color point_mapping(float px, float py);
 
      public:
 
@@ -136,13 +137,11 @@ namespace CGL
         }
 
         // Fill a pixel, which may contain multiple samples
-        void fill_pixel(size_t x, size_t y, Color c);
+        void fill_pixel(size_t x, size_t y, Color c, bool augmented);
 
-        // This function sets the framebuffer target.  The block of memory
-        // for the framebuffer contains 3 * width * height values for an RGB
-        // pixel framebuffer with 8-bits per color channel.
-        virtual void set_framebuffer_target(unsigned char* rgb_framebuffer,
-            size_t width, size_t height);
+        // This function sets the framebuffer target.
+        // The block of memory for the framebuffer contains 3 * width * height values for an RGB pixel framebuffer with 8-bits per color channel.
+        virtual void set_framebuffer_target(unsigned char* rgb_framebuffer, size_t width, size_t height);
 
         virtual void clear_buffers();
 

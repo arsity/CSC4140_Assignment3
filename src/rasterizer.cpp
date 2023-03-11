@@ -1,3 +1,4 @@
+#include <cmath>
 #include "rasterizer.h"
 
 using namespace std;
@@ -19,18 +20,23 @@ namespace CGL
     }
 
     // Used by rasterize_point and rasterize_line
-    void RasterizerImp::fill_pixel(size_t x, size_t y, Color c)
+    void RasterizerImp::fill_pixel(size_t x, size_t y, Color c, bool augmented = false)
     {
-        // TODO: Task 2: You might need to this function to fix points and lines (such as the black rectangle border in test4.svg)
-        // NOTE: You are not required to implement proper supersampling for points and lines
-        // It is sufficient to use the same color for all supersamples of a pixel for points and lines (not triangles)
-
-
-        sample_buffer[y * width + x] = c;
+        // TODO: Task 2: You might need to update this function to fix points and lines (such as the black rectangle border in test4.svg)
+        // NOTE: You are not required to implement proper super-sampling for points and lines
+        // It is sufficient to use the same color for all super-samples of a pixel for points and lines (not triangles)
+        if (augmented)
+        {
+            sample_buffer[y * width + x] = c;
+        }
+        else
+        {
+            auto multiple = ::sqrt(get_sample_rate());
+            sample_buffer[y * width * multiple + x * multiple] = c;
+        }
     }
 
-    // Rasterize a point: simple example to help you start familiarizing
-    // yourself with the starter code.
+    // Rasterize a point: simple example to help you start familiarizing yourself with the starter code.
     //
     void RasterizerImp::rasterize_point(float x, float y, Color color)
     {
@@ -42,7 +48,7 @@ namespace CGL
         if (sx < 0 || sx >= width) return;
         if (sy < 0 || sy >= height) return;
 
-        fill_pixel(sx, sy, color);
+        fill_pixel(sx, sy, color, false);
         return;
     }
 
@@ -75,33 +81,6 @@ namespace CGL
         }
     }
 
-    bool RasterizerImp::check_inside(float px, float py, float x0, float y0, float x1, float y1, float x2, float y2)
-    {
-        // triangle lines
-        auto x_ab = x1 - x0;
-        auto x_bc = x2 - x1;
-        auto x_ca = x0 - x2;
-        auto y_ab = y1 - y0;
-        auto y_bc = y2 - y1;
-        auto y_ca = y0 - y2;
-
-        // point to target
-        auto x_ap = px - x0;
-        auto x_bp = px - x1;
-        auto x_cp = px - x2;
-        auto y_ap = py - y0;
-        auto y_bp = py - y1;
-        auto y_cp = py - y2;
-
-        // cross product of vectors
-        auto state1 = x_ab * y_ap - x_ap * y_ab;
-        auto state2 = x_bc * y_bp - x_bp * y_bc;
-        auto state3 = x_ca * y_cp - x_cp * y_ca;
-
-        return (state1 >= 0 && state2 >= 0 && state3 >= 0) || (state1 <= 0 && state2 <= 0 && state3 <= 0);
-
-    }
-
     // Rasterize a triangle.
     void RasterizerImp::rasterize_triangle(float x0, float y0,
         float x1, float y1,
@@ -109,28 +88,49 @@ namespace CGL
         Color color)
     {
         // TODO: Task 1: Implement basic triangle rasterization here, no supersampling
+        // find out the bounding box
+        int min_x = floor(min(x0, min(x1, x2)));
+        int max_x = ceil(max(x0, max(x1, x2)));
 
-        // generate box
-        auto x_min = floor(min(x0, min(x1, x2)));
-        auto x_max = ceil(max(x0, max(x1, x2)));
-        auto y_min = floor(min(x0, min(x1, x2)));
-        auto y_max = ceil(max(y0, max(y1, y2)));
+        int min_y = floor(min(y0, min(y1, y2)));
+        int max_y = floor(max(y0, max(y1, y2)));
 
-        // box iteration
-        for (auto x = x_min; x < x_max; x++)
+        int sr = get_sample_rate();
+        int multiplier = sqrt(sr);
+
+        if (sr == 1)
         {
-            for (auto y = y_min; y < y_max; y++)
+            // iterate super pixels in the bounding box
+            for (int x = min_x; x < max_x; x++)
             {
-                if (check_inside(x + 0.5, y + 0.5, x0, y0, x1, y1, x2, y2))
+                for (int y = min_y; y < max_y; y++)
                 {
-                    rasterize_point(x, y, color);
+                    if (check_inside(x0, y0, x1, y1, x2, y2, x + 0.5, y + 0.5, Color()))
+                    {
+                        rasterize_point(x, y, color);
+                    }
                 }
             }
         }
+            // TODO: Task 2: Update to implement super-sampled rasterization
+        else
+        {
+            for (int x = min_x * multiplier; x < max_x * multiplier; x++)
+            {
+                for (int y = min_y * multiplier; y < max_y * multiplier; y++)
+                {
+                    if (check_inside(x0 * multiplier, y0 * multiplier,
+                        x1 * multiplier, y1 * multiplier,
+                        x2 * multiplier, y2 * multiplier,
+                        x + 0.5, y + 0.5, color))
+                    {
 
-        // TODO: Task 2: Update to implement super-sampled rasterization
+                        fill_pixel(x, y, color, true);
 
-
+                    }
+                }
+            }
+        }
 
     }
 
@@ -161,23 +161,27 @@ namespace CGL
 
     void RasterizerImp::set_sample_rate(unsigned int rate)
     {
-        // TODO: Task 2: You may want to update this function for supersampling support
+        // TODO: Task 2: You may want to update this function for super-sampling support
 
         this->sample_rate = rate;
 
-        this->sample_buffer.resize(width * height, Color::White);
+        // resize the sample buffer to multiply the previous size with sqrt(sample_rate)
+        int multiplier = sqrt(get_sample_rate());
+        this->sample_buffer.resize((width * multiplier) * (height * multiplier), Color::White);
     }
 
     void RasterizerImp::set_framebuffer_target(unsigned char* rgb_framebuffer,
         size_t width, size_t height)
     {
-        // TODO: Task 2: You may want to update this function for supersampling support
+        // TODO: Task 2: You may want to update this function for super-sampling support
 
         this->width = width;
         this->height = height;
         this->rgb_framebuffer_target = rgb_framebuffer;
 
-        this->sample_buffer.resize(width * height, Color::White);
+        // resize the sample buffer to multiply the previous size with sqrt(sample_rate)
+        int multiplier = sqrt(get_sample_rate());
+        this->sample_buffer.resize((width * multiplier) * (height * multiplier), Color::White);
     }
 
     void RasterizerImp::clear_buffers()
@@ -193,26 +197,77 @@ namespace CGL
     //
     void RasterizerImp::resolve_to_framebuffer()
     {
-        // TODO: Task 2: You will likely want to update this function for supersampling support
-
-
-        for (int x = 0; x < width; ++x)
+        // TODO: Task 2: You will likely want to update this function for super-sampling support
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height; ++y)
+            for (int y = 0; y < height; y++)
             {
-                Color col = sample_buffer[y * width + x];
+                Color col = point_mapping(x, y);
 
-                for (int k = 0; k < 3; ++k)
+                for (int k = 0; k < 3; k++)
                 {
                     this->rgb_framebuffer_target[3 * (y * width + x) + k] = (&col.r)[k] * 255;
                 }
             }
         }
+    }
 
+    Color RasterizerImp::point_mapping(float px, float py)
+    {
+        auto sr = get_sample_rate();
+        if (sr == 1)
+        {
+            return sample_buffer[py * width + px];
+        }
+
+        auto multiple = ::sqrt(sr);
+        auto sum = Color{};
+
+        for (int i = 0; i < multiple; ++i)
+        {
+            for (int j = 0; j < multiple; ++j)
+            {
+                sum += sample_buffer[py * multiple * width + i + px * multiple + j];
+            }
+        }
+
+        return sum * (1 / static_cast<float>(sr));
+    }
+
+    bool
+    RasterizerImp::check_inside(float x0, float y0, float x1, float y1, float x2, float y2, float px, float py, Color color)
+    {
+        // compute all vectors
+        float x_ab = x1 - x0;
+        float y_ab = y1 - y0;
+
+        float x_bc = x2 - x1;
+        float y_bc = y2 - y1;
+
+        float x_ca = x0 - x2;
+        float y_ca = y0 - y2;
+
+        float x_ap = px - x0;
+        float y_ap = py - y0;
+
+        float x_bp = px - x1;
+        float y_bp = py - y1;
+
+        float x_cp = px - x2;
+        float y_cp = py - y2;
+
+        // perform cross-product three times
+        float state_1 = x_ab * y_ap - y_ab * x_ap;
+        float state_2 = x_bc * y_bp - y_bc * x_bp;
+        float state_3 = x_ca * y_cp - y_ca * x_cp;
+
+        if ((state_1 >= 0 && state_2 >= 0 && state_3 >= 0) || (state_1 <= 0 && state_2 <= 0 && state_3 <= 0))
+            return true;
+
+        return false;
     }
 
     Rasterizer::~Rasterizer()
-    {
-    }
+    = default;
 
 }// CGL

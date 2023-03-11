@@ -98,7 +98,7 @@ legacy images.
 As GLFW uses libwayland directly, without any intervening toolkit library, it
 has sole responsibility for interacting well with every compositor in use on
 Unix-like systems.  Most of the features are provided by the core protocol,
-while cursor support is provided by the libwayland-cursor helper library, EGL
+while cursor support is provided by the libwayland-cursor __resolve_to_framebuffer library, EGL
 integration by libwayland-egl, and keyboard handling by
 [libxkbcommon](https://xkbcommon.org/).  In addition, GLFW uses some protocols
 from wayland-protocols to provide additional features if the compositor

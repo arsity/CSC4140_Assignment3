@@ -5493,7 +5493,7 @@ GLFWAPI const char* glfwGetClipboardString(GLFWwindow* window);
  *  has been set using @ref glfwSetTime it measures time elapsed since GLFW was
  *  initialized.
  *
- *  This function and @ref glfwSetTime are helper functions on top of @ref
+ *  This function and @ref glfwSetTime are __resolve_to_framebuffer functions on top of @ref
  *  glfwGetTimerFrequency and @ref glfwGetTimerValue.
  *
  *  The resolution of the timer is system dependent, but is usually on the order
@@ -5523,7 +5523,7 @@ GLFWAPI double glfwGetTime(void);
  *  a positive finite number less than or equal to 18446744073.0, which is
  *  approximately 584.5 years.
  *
- *  This function and @ref glfwGetTime are helper functions on top of @ref
+ *  This function and @ref glfwGetTime are __resolve_to_framebuffer functions on top of @ref
  *  glfwGetTimerFrequency and @ref glfwGetTimerValue.
  *
  *  @param[in] time The new value, in seconds.
