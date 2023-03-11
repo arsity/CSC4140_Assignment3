@@ -82,12 +82,13 @@ namespace CGL
         // The number of elements in buffer = width * height * sample_rate
         std::vector<Color> sample_buffer;
 
-        bool check_inside(float x0, float y0, float x1, float y1, float x2, float y2, float px, float py, Color color);
+        static bool check_inside(float x0, float y0, float x1, float y1, float x2, float y2, float px, float py);
 
-        Color point_mapping(float px, float py);
+        static void barycentric(
+            const Vector2D& a, const Vector2D& b, const Vector2D& c, const Vector2D& p,
+            float& u, float& v, float& w);
 
      public:
-
         RasterizerImp(PixelSampleMethod psm, LevelSampleMethod lsm,
             size_t width, size_t height, unsigned int sample_rate);
 
@@ -106,6 +107,13 @@ namespace CGL
         // P0 = (x0, y0)
         // P1 = (x1, y1)
         // P2 = (x2, y2)
+        void draw_line(float x0, float y0,
+            float x1, float y1,
+            float x2, float y2,
+            float x,
+            float min_y, float max_y,
+            Color color);
+
         void rasterize_triangle(float x0, float y0,
             float x1, float y1,
             float x2, float y2,
@@ -137,11 +145,13 @@ namespace CGL
         }
 
         // Fill a pixel, which may contain multiple samples
-        void fill_pixel(size_t x, size_t y, Color c, bool augmented);
+        void fill_pixel(size_t x, size_t y, Color c);
 
-        // This function sets the framebuffer target.
-        // The block of memory for the framebuffer contains 3 * width * height values for an RGB pixel framebuffer with 8-bits per color channel.
-        virtual void set_framebuffer_target(unsigned char* rgb_framebuffer, size_t width, size_t height);
+        // This function sets the framebuffer target.  The block of memory
+        // for the framebuffer contains 3 * width * height values for an RGB
+        // pixel framebuffer with 8-bits per color channel.
+        virtual void set_framebuffer_target(unsigned char* rgb_framebuffer,
+            size_t width, size_t height);
 
         virtual void clear_buffers();
 
@@ -149,7 +159,6 @@ namespace CGL
         // rasterized samples (including subpixel super-samples, if relevant)
         // in preparation for posting pixels to the screen.
         virtual void resolve_to_framebuffer();
-
     };
 
 }
