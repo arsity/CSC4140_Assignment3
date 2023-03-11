@@ -38,7 +38,7 @@ namespace CGL
         // RGB color values
         std::vector<unsigned char> texels;
 
-        Color get_texel(int tx, int ty);
+        Color get_texel(int tx, int ty) const;
     };
 
     struct Texture
@@ -66,9 +66,9 @@ namespace CGL
         Color sample(const SampleParams& sp);
         float get_level(const SampleParams& sp);
 
-        Color sample_nearest(Vector2D uv, int level = 0);
+        Color sample_nearest(const Vector2D& uv, int level = 0);
 
-        Color sample_bilinear(Vector2D uv, int level = 0);
+        Color sample_bilinear(const Vector2D& uv, int level = 0);
     };
 
 }

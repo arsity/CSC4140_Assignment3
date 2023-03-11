@@ -10,51 +10,135 @@ namespace CGL
     Color Texture::sample(const SampleParams& sp)
     {
         // TODO: Task 6: Fill this in.
-
-
-// return magenta for invalid level
-        return Color(1, 0, 1);
+        // define variables
+        float level;
+        Color color, next_color, result_color;
+        result_color = Color(1, 0, 1);
+        if (sp.psm == P_NEAREST)
+        {
+            // level sampling method
+            if (sp.lsm == L_ZERO)
+            {
+                level = 0.f;
+                result_color = sample_nearest(sp.p_uv, (int)level);
+            }
+            else if (sp.lsm == L_NEAREST)
+            {
+                level = get_level(sp);
+                if (level - floor(level) < 0.5)
+                    result_color = sample_nearest(sp.p_uv, floor(level));
+                else
+                    result_color = sample_nearest(sp.p_uv, ceil(level));
+            }
+            else if (sp.lsm == L_LINEAR)
+            {
+                level = get_level(sp);
+                color = sample_nearest(sp.p_uv, floor(level));
+                next_color = sample_nearest(sp.p_uv, ceil(level));
+                result_color = color * (ceil(level) - level) + next_color * (level - floor(level));
+            }
+        }
+        else if (sp.psm == P_LINEAR)
+        {
+            if (sp.lsm == L_ZERO)
+            {
+                level = 0.f;
+                result_color = sample_bilinear(sp.p_uv, (int)level);
+            }
+            else if (sp.lsm == L_NEAREST)
+            {
+                level = get_level(sp);
+                if (level - floor(level) < 0.5)
+                    result_color = sample_bilinear(sp.p_uv, floor(level));
+                else
+                    result_color = sample_bilinear(sp.p_uv, ceil(level));
+            }
+            else if (sp.lsm == L_LINEAR)
+            {
+                level = get_level(sp);
+                color = sample_bilinear(sp.p_uv, floor(level));
+                next_color = sample_bilinear(sp.p_uv, ceil(level));
+                result_color = color * (ceil(level) - level) + next_color * (level - floor(level));
+            }
+        }
+        // return magenta for invalid level
+        return result_color;
     }
 
     float Texture::get_level(const SampleParams& sp)
     {
         // TODO: Task 6: Fill this in.
-
-
-
-        return 0;
+        float level;
+        int width = mipmap[0].width;
+        int height = mipmap[0].height;
+        level = max(sqrt(
+                pow(sp.p_dx_uv.x * width - sp.p_uv.x * width, 2) + pow(sp.p_dx_uv.y * height - sp.p_uv.y * height, 2)),
+            sqrt(
+                pow(sp.p_dy_uv.x * width - sp.p_uv.x * width, 2) + pow(sp.p_dy_uv.y * height - sp.p_uv.y * height, 2)));
+        level = log2(level);
+        return level;
     }
 
-    Color MipLevel::get_texel(int tx, int ty)
+    Color MipLevel::get_texel(int tx, int ty) const
     {
         return Color(&texels[tx * 3 + ty * width * 3]);
     }
 
-    Color Texture::sample_nearest(Vector2D uv, int level)
+    Color Texture::sample_nearest(const Vector2D& uv, int level)
+    {
+        // TODO: Task 5: Fill this in.
+        const auto& mip = mipmap[level];
+        // get the coordinate
+        const auto x = uv.x * mip.width;
+        const auto y = uv.y * mip.height;
+        const float near[4] = { static_cast<float>(floor(x)), static_cast<float>(ceil(x)),
+                                static_cast<float>(floor(y)), static_cast<float>(ceil(y)) };
+        int near_x, near_y;
+        float distance = MAXFLOAT;
+        float temp_distance;
+
+        for (int i = 0; i < 4; i++)
+        {
+            temp_distance = pow(near[i / 2] - x, 2) + pow(near[i % 2 + 2] - y, 2);
+            // compare and update the sample point to nearest one
+            if (temp_distance < distance)
+            {
+                distance = temp_distance;
+                near_x = near[i / 2];
+                near_y = near[i % 2 + 2];
+            }
+        }
+        Color near_color = Color(1, 0, 1);
+        near_color = mip.get_texel(near_x, near_y);
+        // return magenta for invalid level
+        return near_color;
+    }
+    // define lerp function
+    Color lerp(float ratio, Color u0, Color u1)
+    {
+        Color result_color;
+        result_color = (1 - ratio) * u0 + ratio * u1;
+        return result_color;
+    }
+    Color Texture::sample_bilinear(const Vector2D& uv, int level)
     {
         // TODO: Task 5: Fill this in.
         auto& mip = mipmap[level];
-
-
-
-
+        Color bilinear_color = Color(1, 0, 1);
+        const auto x = uv.x * mip.width;
+        const auto y = uv.y * mip.height;
+        auto x0 = floor(x);
+        auto x1 = ceil(x);
+        auto y0 = floor(y);
+        auto y1 = ceil(y);
+        float s = x - x0;
+        float t = y1 - y;
+        Color u0 = lerp(s, mip.get_texel(x0, y1), mip.get_texel(x1, y1));
+        Color u1 = lerp(s, mip.get_texel(x0, y0), mip.get_texel(x1, y0));
+        bilinear_color = lerp(t, u0, u1);
         // return magenta for invalid level
-        return Color(1, 0, 1);
+        return bilinear_color;
     }
-
-    Color Texture::sample_bilinear(Vector2D uv, int level)
-    {
-        // TODO: Task 5: Fill this in.
-        auto& mip = mipmap[level];
-
-
-
-
-        // return magenta for invalid level
-        return Color(1, 0, 1);
-    }
-
-
 
     /****************************************************************************/
 
@@ -102,9 +186,9 @@ namespace CGL
 
             // handle odd size texture by rounding down
             width = max(1, width / 2);
-            //assert (width > 0);
+            // assert (width > 0);
             height = max(1, height / 2);
-            //assert (height > 0);
+            // assert (height > 0);
 
             level.width = width;
             level.height = height;
@@ -167,7 +251,7 @@ namespace CGL
             // case 1: reduction only in horizontal size (vertical size is 1)
             if (currLevel.height == prevLevel.height)
             {
-                //assert (currLevel.height == 1);
+                // assert (currLevel.height == 1);
 
                 for (int i = 0; i < currLevel.width; i++)
                 {
@@ -193,7 +277,7 @@ namespace CGL
             }
             else if (currLevel.width == prevLevel.width)
             {
-                //assert (currLevel.width == 1);
+                // assert (currLevel.width == 1);
 
                 for (int j = 0; j < currLevel.height; j++)
                 {
