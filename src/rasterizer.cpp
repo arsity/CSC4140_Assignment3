@@ -100,44 +100,6 @@ namespace CGL
         return (state_1 >= 0 && state_2 >= 0 && state_3 >= 0) || (state_1 <= 0 && state_2 <= 0 && state_3 <= 0);
     }
 
-    // this function is to get cross point for a line and triangle
-    void getcross(float x0, float y0,
-        float x1, float y1,
-        float x2, float y2,
-        int& y_below, int& y_above,
-        float x)
-    {
-        float y_1, y_2, y_3, y4, y5;
-        // find three cross point the line with three edge line
-        y_1 = (y1 * x - y0 * x - y1 * x0 + y0 * x1) / (x1 - x0);
-        y_2 = (y2 * x - y1 * x - y2 * x1 + y1 * x2) / (x2 - x1);
-        y_3 = (y0 * x - y2 * x - y0 * x2 + y2 * x0) / (x0 - x2);
-        // find the cross point not in triangle
-        if ((y_1 < y0 && y_1 < y1) || (y_1 > y0 && y_1 > y1))
-        {
-            y4 = y_2;
-            y5 = y_3;
-        }
-        else if ((y_2 < y1 && y_2 < y2) || (y_2 > y1 && y_2 > y2))
-        {
-            y4 = y_1;
-            y5 = y_3;
-        }
-        else if ((y_3 < y0 && y_3 < y2) || (y_3 > y0 && y_3 > y2))
-        {
-            y4 = y_1;
-            y5 = y_2;
-        }
-            // if problem come up, just using bounding box method for this line
-        else
-        {
-            y4 = min(y0, min(y1, y2));
-            y5 = max(y0, max(y1, y2));
-        }
-        y_below = floor(min(y4, y5));
-        y_above = ceil(max(y4, y5));
-    }
-
     // Rasterize a triangle.
     void RasterizerImp::rasterize_triangle(float x0, float y0,
         float x1, float y1,
@@ -197,7 +159,6 @@ namespace CGL
                 }
             }
         }
-
     }
 
     void RasterizerImp::barycentric(
@@ -263,12 +224,11 @@ namespace CGL
         // Hint: You can reuse code from rasterize_triangle/rasterize_interpolated_color_triangle
         SampleParams sp;
         Color color;
-        float level;
         float u, v, w;
         // get the vector of vertex
-        Vector2D a = Vector2D(x0, y0);
-        Vector2D b = Vector2D(x1, y1);
-        Vector2D c = Vector2D(x2, y2);
+        auto a = Vector2D(x0, y0);
+        auto b = Vector2D(x1, y1);
+        auto c = Vector2D(x2, y2);
 
         sp.psm = this->psm;
         sp.lsm = this->lsm;
@@ -285,11 +245,14 @@ namespace CGL
                 if (check_inside(x0, y0, x1, y1, x2, y2, x + 0.5, y + 0.5))
                 {
                     barycentric(a, b, c, Vector2D(x, y), u, v, w);
-                    sp.p_uv = Vector2D((u0 * u + u1 * v + u2 * w), (v0 * u + v1 * v + v2 * w));
-                    barycentric(a, b, c, Vector2D(x + 1, y), u, v, w);
-                    sp.p_dx_uv = Vector2D((u0 * u + u1 * v + u2 * w), (v0 * u + v1 * v + v2 * w));
-                    barycentric(a, b, c, Vector2D(x, y + 1), u, v, w);
-                    sp.p_dy_uv = Vector2D((u0 * u + u1 * v + u2 * w), (v0 * u + v1 * v + v2 * w));
+                    sp.p_uv = Vector2D{ u0 * u + u1 * v + u2 * w, v0 * u + v1 * v + v2 * w };
+
+                    barycentric(a, b, c, Vector2D{ static_cast<double>(x + 1), static_cast<double>(y) }, u, v, w);
+                    sp.p_dx_uv = Vector2D{ u0 * u + u1 * v + u2 * w, v0 * u + v1 * v + v2 * w };
+
+                    barycentric(a, b, c, Vector2D{ static_cast<double>(x), static_cast<double>(y + 1) }, u, v, w);
+                    sp.p_dy_uv = Vector2D{ u0 * u + u1 * v + u2 * w, v0 * u + v1 * v + v2 * w };
+
                     color = tex.sample(sp);
                     rasterize_point(floor(x), floor(y), color);
                 }
@@ -331,7 +294,7 @@ namespace CGL
     void RasterizerImp::resolve_to_framebuffer()
     {
         // TODO: Task 2: You will likely want to update this function for supersampling support
-        Color col = Color::White;
+        Color col{};
         for (int x = 0; x < width; ++x)
         {
             for (int y = 0; y < height; ++y)
