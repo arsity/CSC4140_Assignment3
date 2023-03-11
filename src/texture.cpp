@@ -72,9 +72,11 @@ namespace CGL
         int width = mipmap[0].width;
         int height = mipmap[0].height;
         level = max(sqrt(
-                pow(sp.p_dx_uv.x * width - sp.p_uv.x * width, 2) + pow(sp.p_dx_uv.y * height - sp.p_uv.y * height, 2)),
+                pow(sp.p_dx_uv.x * width - sp.p_uv.x * width, 2)
+                + pow(sp.p_dx_uv.y * height - sp.p_uv.y * height, 2)),
             sqrt(
-                pow(sp.p_dy_uv.x * width - sp.p_uv.x * width, 2) + pow(sp.p_dy_uv.y * height - sp.p_uv.y * height, 2)));
+                pow(sp.p_dy_uv.x * width - sp.p_uv.x * width, 2)
+                + pow(sp.p_dy_uv.y * height - sp.p_uv.y * height, 2)));
         level = log2(level);
         return level;
     }
