@@ -136,9 +136,9 @@ namespace CGL
                 for (auto y = min_y; y < max_y; y++)
                 {
                     auto count = 0;
-                    for (int i = 0; i < multiple; ++i)
+                    for (auto i = 0; i < multiple; ++i)
                     {
-                        for (int j = 0; j < multiple; ++j)
+                        for (auto j = 0; j < multiple; ++j)
                         {
                             if (check_inside(x0, y0, x1, y1, x2, y2,
                                 float(x) + float(i) / multiple,
