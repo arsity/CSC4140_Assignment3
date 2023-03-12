@@ -6,7 +6,7 @@ Haopeng Chen 120090645
 
 First, use bounding box method to determine rasterization area. Then, use cross product to find the accurate position of each point (in/out) triangle. That is, the product of vectors from each point of the triangle to the target point with the vectors of triangles must be all positive or negative. At last, `rasterize_point` point by point.
 
-<img src="./Report.assets/image-20230312073152594.png" alt="image-20230312073152594" style="zoom: 33%;" />
+![image-20230312073152594](./Report.assets/image-20230312073152594.png)
 
 ## Task 2
 
@@ -14,13 +14,13 @@ Supersampling is useful as it adopts convolution to pixel. On jaggies, convoluti
 
 Left to right: 1x, 4x, 16x (sample rates).
 
-<img src="./Report.assets/image-20230312081558828.png" alt="image-20230312081558828" style="zoom:25%;" /><img src="./Report.assets/image-20230312081622151.png" alt="image-20230312081622151" style="zoom:25%;" /><img src="./Report.assets/image-20230312081650950.png" alt="image-20230312081650950" style="zoom:25%;" />
+![image-20230312081558828](./Report.assets/image-20230312081558828.png)![image-20230312081622151](./Report.assets/image-20230312081622151.png)![image-20230312081650950](./Report.assets/image-20230312081650950.png)
 
 ## Task 3
 
 Do not familiar with front end things. No modification here.
 
-<img src="./Report.assets/image-20230312083215422.png" alt="image-20230312083215422" style="zoom: 33%;" />
+![image-20230312083215422](./Report.assets/image-20230312083215422.png)
 
 ## Task 4
 
@@ -28,16 +28,16 @@ Barycentric coordinates could be considered as a transformation from 2D space (s
 
 From another perspective, it could also be considered as a 2D space (screen plane) mapping into 1D (line) problem. That is, we consider RGB as three independent channels and to find out their distribution separately.
 
-<img src="./Report.assets/image-20230312083326292.png" alt="image-20230312083326292" style="zoom: 33%;" />
+![image-20230312083326292](./Report.assets/image-20230312083326292.png)
 
 ## Task 5
 
 Pixel sampling is like color sampling, which is that the color is substitute by the pixel color after transformation of texture coordinate. Nearest sampling adopts the nearest pixel point for the pixel color, leading to mosaics in high resolution. Bilinear sampling use kind of average number to predict the color of that missing pixel point.
 
-<img src="./Report.assets/image-20230312084709785.png" alt="image-20230312084709785" style="zoom: 33%;" /><img src="./Report.assets/image-20230312090415044.png" alt="image-20230312090415044" style="zoom:33%;" /><img src="./Report.assets/image-20230312084725484.png" alt="image-20230312084725484" style="zoom: 33%;" /><img src="./Report.assets/image-20230312090448219.png" alt="image-20230312090448219" style="zoom:33%;" />
+![image-20230312084709785](./Report.assets/image-20230312084709785.png)![image-20230312090415044](./Report.assets/image-20230312090415044.png)![image-20230312084725484](./Report.assets/image-20230312084725484.png)![image-20230312090448219](./Report.assets/image-20230312090448219.png)
 
 ## Task 6
 
 Level sampling is something for improve performance. We can choose to one by one mapping, four to one mapping etc.. We could also use convolution like operations to make it look smooth.
 
-<img src="./Report.assets/image-20230312094125073.png" alt="image-20230312094125073" style="zoom:33%;" /><img src="./Report.assets/image-20230312094154121.png" alt="image-20230312094154121" style="zoom:33%;" /><img src="./Report.assets/image-20230312094246979.png" alt="image-20230312094246979" style="zoom:33%;" /><img src="./Report.assets/image-20230312094353043.png" alt="image-20230312094353043" style="zoom:33%;" />
+![image-20230312094125073](./Report.assets/image-20230312094125073.png)![image-20230312094154121](./Report.assets/image-20230312094154121.png)![image-20230312094246979](./Report.assets/image-20230312094246979.png)![image-20230312094353043](./Report.assets/image-20230312094353043.png)
