@@ -32,6 +32,12 @@ From another perspective, it could also be considered as a 2D space (screen plan
 
 ## Task 5
 
-Pixel sampling is like color sampling, which is that the color is substitute by the pixel color after transformation of texture coordinate. 
+Pixel sampling is like color sampling, which is that the color is substitute by the pixel color after transformation of texture coordinate. Nearest sampling adopts the nearest pixel point for the pixel color, leading to mosaics in high resolution. Bilinear sampling use kind of average number to predict the color of that missing pixel point.
 
 <img src="./Report.assets/image-20230312084709785.png" alt="image-20230312084709785" style="zoom: 33%;" /><img src="./Report.assets/image-20230312090415044.png" alt="image-20230312090415044" style="zoom:33%;" /><img src="./Report.assets/image-20230312084725484.png" alt="image-20230312084725484" style="zoom: 33%;" /><img src="./Report.assets/image-20230312090448219.png" alt="image-20230312090448219" style="zoom:33%;" />
+
+## Task 6
+
+Level sampling is something for improve performance. We can choose to one by one mapping, four to one mapping etc.. We could also use convolution like operations to make it look smooth.
+
+<img src="./Report.assets/image-20230312094125073.png" alt="image-20230312094125073" style="zoom:33%;" /><img src="./Report.assets/image-20230312094154121.png" alt="image-20230312094154121" style="zoom:33%;" /><img src="./Report.assets/image-20230312094246979.png" alt="image-20230312094246979" style="zoom:33%;" /><img src="./Report.assets/image-20230312094353043.png" alt="image-20230312094353043" style="zoom:33%;" />
